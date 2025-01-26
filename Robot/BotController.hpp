@@ -11,7 +11,7 @@
 
 class BotController{    
     public:
-        BotController(LEDController& led_controller, MotorController& left_wheel_controller, MotorController& right_wheel_controller, UdpController& udp_controller, AccelGyroController& accel_gyro_controller, MeltyController& melty_controller): led(led_controller), left_wheel(left_wheel_controller), right_wheel(right_wheel_controller), udp_controller(udp_controller), accel_gyro(accel_gyro_controller), melty_controller(melty_controller){
+        BotController(LEDController& led_controller, MotorController& left_wheel_controller, MotorController& right_wheel_controller, PS2_ControllerInterface& ps2_controller, AccelGyroController& accel_gyro_controller, led(led_controller), left_wheel(left_wheel_controller), right_wheel(right_wheel_controller), ps2_controller(ps2_controller), accel_gyro(accel_gyro_controller){
         motor_input_speed_top = MotorController::SPEED_TOP;
         motor_input_speed_bottom = MotorController::SPEED_BOTTOM;
        };
@@ -44,9 +44,8 @@ class BotController{
         LEDController &led;
         MotorController &left_wheel;
         MotorController &right_wheel;
-        UdpController &udp_controller;
+        PS2_ControllerInterface &ps2_controller;
         AccelGyroController &accel_gyro;
-        MeltyController &melty_controller;
 
         bool melty_mode = false; //If false, tank mode.
         int forward = 0;
@@ -57,10 +56,10 @@ class BotController{
         int right_wheel_forward = 0;
 
         void _tank_drive(){
-            int LX = udp_controller.get_LX(), LY = udp_controller.get_LY();
+            int LX = ps2_controller.get_LX(), LY = ps2_controller.get_LY();
             // Serial.printf("LX = %d\t LY = %d\n", LX, LY);
-            forward = map(udp_controller.get_LY(), 254, 0, -1024, 1024);
-            right = map(udp_controller.get_LX(), 0, 254, -256, 256); //mapping from 254 instead of 255 as using 255 gives 127.5 as midpoint and resulting rounding error leads to small motor signal at rest.
+            forward = map(ps2_controller.get_LY(), 254, 0, -1024, 1024);
+            right = map(ps2_controller.get_LX(), 0, 254, -256, 256); //mapping from 254 instead of 255 as using 255 gives 127.5 as midpoint and resulting rounding error leads to small motor signal at rest.
             // printf("Forward = %d\t Right = %d\n", forward, right);
             //Mixing:
             left_wheel_forward = constrain(forward + right, -1024, 1024);

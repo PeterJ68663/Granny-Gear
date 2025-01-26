@@ -76,14 +76,17 @@ unsigned long heading_steer_time, last_heading_steer_time = 0, time_since_last_h
 int steer;
 
 
-//  Setup Controllers:
+//  Set up Controllers:
 AccelGyroController accel_gyro{};
-UdpController udp_controller{};
 LEDController led_controller{LEDpin};
 MotorController left_motor_controller{leftESCPin};
 MotorController right_motor_controller{rightESCPin};
-MeltyController melty_controller{led_controller, accel_gyro, udp_controller};
-BotController bot_controller{led_controller, left_motor_controller, right_motor_controller, udp_controller, accel_gyro, melty_controller};
+
+UdpInterface udp_interface{};
+PS2_ControllerInterface ps2_controller{udp_interface};
+DataLoggerInterface data_logger{udp_interface};
+
+BotController bot_controller{led_controller, left_motor_controller, right_motor_controller, udp_interface, accel_gyro};
 
 
 void setup() {
@@ -92,14 +95,14 @@ void setup() {
   Serial.println('\n');
   //  Serial.printf("%f\t%f\t%f\t%f\t", desired_angular_velocity_rad_per_s, desired_centripetal_acceleration_ms2, desired_centripetal_acceleration_g, desired_measured_accel_x);
 
-  udp_controller.begin();
+  udp_interface.begin();
   accel_gyro.begin();
   bot_controller.begin();
 }
 
 void loop() {
-    udp_controller.ReadController();
-    if (udp_controller.ReceivingFromController()){
+    ps2_controller.ReadController();
+    if (ps2_controller.ReceivingFromController()){
       Serial.println("Received signal, driving.");
       bot_controller.drive();
     }
@@ -111,7 +114,7 @@ void loop() {
 
 //     TankOrMelty();
   
-//   if (udp_controller.ReceivingFromController()) {
+//   if (udp_interface.ReceivingFromController()) {
 //     read_accel_this_cycle = false;
 //     time_this_accel_reading = millis();
 //     time_since_last_accel_reading = time_this_accel_reading - time_last_accel_reading;
@@ -150,7 +153,7 @@ void loop() {
 //       if (heading >= 36000) {
 //         heading = heading % 36000;
 //       }
-//       udp_controller.LogData();
+//       udp_interface.LogData();
       
 //       //Heading light
 //       if (heading <= 2000 or heading >= (36000 - 2000)) {
@@ -257,7 +260,7 @@ void TankDrive() {
 // }
 
 void TankOrMelty() {
-  if (udp_controller.get_RX() >= 150 | udp_controller.get_RX() <= 104) {
+  if (udp_interface.get_RX() >= 150 | udp_interface.get_RX() <= 104) {
     controlMode = 'M';
   }
   else {
@@ -324,7 +327,7 @@ void constant_motor_control(){
 // }
 
 void Translate(){
-  forward = map(udp_controller.get_LY(), 0, 255, 127, -127);
+  forward = map(udp_interface.get_LY(), 0, 255, 127, -127);
   leftWheelTranslate = 0;
   rightWheelTranslate = 0;
   int translate_throttle = 40;
