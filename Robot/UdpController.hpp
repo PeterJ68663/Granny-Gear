@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include <WiFi.h>        // Include the Wi-Fi library
 #include <WiFiUDP.h>
-// #include "BotController.hpp"
 
 
 unsigned int localUdpPort = 4210;  // local port to listen on
@@ -51,51 +50,49 @@ class UdpInterface{
         }
 };
 
+
 class DataLoggerInterface{
 
     public:
-
-            DataLoggerInterface(UdpInterface& udp){
-                _udp = udp.Udp
-            }
-
-            void LogData() {
-                int time_this_message_sent = millis();
-                int time_since_last_message_sent = time_this_message_sent - _time_last_message_sent_to_logger;
-                _time_last_message_sent_to_logger = time_this_message_sent;
-                // Send acclerometer data to data logger
-                char data[80];
-                
-                // Need to work out how I'm getting the data in here.
-                // sprintf(data, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", accelerometer_x, time_since_last_message_sent, error, diff_error, integral_error, p_change, d_change, i_change, change, right, leftWheelForward, measured_degrees_per_second, heading);
-                
-                //Serial.printf(data);
-                //Serial.println("Attempting to send udp packet");
-                _udp.beginPacket(data_logger_ip, 4210);
-                _udp.print(data);
-                _udp.endPacket();
-            }
+        DataLoggerInterface(UdpInterface& udp) : _udp(udp.Udp) {}
+        
+        void LogData() {
+            int time_this_message_sent = millis();
+            int time_since_last_message_sent = time_this_message_sent - _time_last_message_sent_to_logger;
+            _time_last_message_sent_to_logger = time_this_message_sent;
+            // Send acclerometer data to data logger
+            char data[80];
+            
+            // Need to work out how I'm getting the data in here.
+            // sprintf(data, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", accelerometer_x, time_since_last_message_sent, error, diff_error, integral_error, p_change, d_change, i_change, change, right, leftWheelForward, measured_degrees_per_second, heading);
+            
+            //Serial.printf(data);
+            //Serial.println("Attempting to send udp packet");
+            _udp.beginPacket(data_logger_ip, 4210);
+            _udp.print(data);
+            _udp.endPacket();
+        }
 
     private:
-            UdpInterface _udp
-            int _time_last_message_sent_to_logger = 0;
+        WiFiUDP& _udp;
+        int _time_last_message_sent_to_logger = 0;
 };
+
 
 class PS2_ControllerInterface{
      
         public:
-
-            PS2_ControllerInterface(UdpInterface& udp){
-                _udp = udp.Udp
-            }
+            PS2_ControllerInterface(UdpInterface& udp) : _udp(udp.Udp), _receiving_from_controller(false) {}
 
             void ReadController() {
-                Serial.println("Attempting to read controller");
+                // Serial.println("Attempting to read controller");
                 _packetSize = _udp.parsePacket();
                 if (_packetSize) {
                     _receiving_from_controller = true;
+                    Serial.printf("Set _receiving_from_controller to %d\n", _receiving_from_controller);
+                    Serial.printf("And the getter returns %d\n", ReceivingFromController());
                     _receive_misses = 0;
-                    Serial.printf("Received %d bytes from %s, port %d\n", _packetSize, Udp.remoteIP().toString().c_str(), Udp.remotePort());
+                    Serial.printf("Received %d bytes from %s, port %d\n", _packetSize, _udp.remoteIP().toString().c_str(), _udp.remotePort());
                     _read_incoming_packet();
                     _packetSize = 0;
                 }
@@ -129,7 +126,6 @@ class PS2_ControllerInterface{
             }
 
         private:
-
             void _buttons_from_byte(unsigned char buttons){
                 _left_pressed = (buttons & (1<<0)) != 0;
                 _right_pressed = (buttons & (1<<1)) != 0;
@@ -140,7 +136,9 @@ class PS2_ControllerInterface{
             void _read_incoming_packet(){
                 int len = _udp.read(_incomingPacket, 9);
                 if (len > 0){
-                    _incomingPacket[len] = 0;
+                    Serial.printf("Getter A: %d\n", ReceivingFromController());
+                    // _incomingPacket[len] = 0;  // Todo: Don't know what this was for. Seems to work without it, so maybe delete?? Also this line is overwriting _receiving_from_controller!!! I think because it's a zero indexed array of length 9, so the 9th position falls off the end of the array.
+                    Serial.printf("Getter B: %d\n", ReceivingFromController());
                     unsigned char* command = _incomingPacket;
                     _LX = command[0];
                     _LY = command[1];
@@ -149,11 +147,13 @@ class PS2_ControllerInterface{
                     _buttons_from_byte(buttons_byte);
                     //  measured_rpm = 500 + command[4] + command[5] + command[6] + command[7];
                     _max_melty_throttle = 1500 + command[8];
-                    //  Serial.printf("%d\t%d\t%d\t%d\t%d\n", command[4], command[5], command[6], command[7], command[8]);
+                    // Serial.printf("%d\t%d\t%d\t%d\t%d\n", command[4], command[5], command[6], command[7], command[8]);
                     //  Serial.printf("Spin speed: %d\tMax throttle: %d\n", measured_rpm, _max_melty_throttle);
-                    // Serial.printf("UDP packet contents: %d\t%d\t%d\t%d\t%d\n", _LX, _LY, _RX, _left_pressed, _right_pressed);
+                    Serial.printf("UDP packet contents: %d\t%d\t%d\t%d\t%d\n", _LX, _LY, _RX, _left_pressed, _right_pressed);
+                    Serial.printf("And the getter is now: %d\n", ReceivingFromController());
                 }
                 else {
+                    Serial.println("Failed to read packet.");
                     HandleNoSignal();
                 }
             }
@@ -163,14 +163,11 @@ class PS2_ControllerInterface{
                 _receive_misses++;
                 if (_receive_misses >= max_receive_misses_before_cutout) {
                     _receiving_from_controller = false;
-                    //Lost signal. Stop LED and Freeze all motors:
-                    Serial.println("No signal.");// Freezing motors\n");
-                    // delay(400);
-                    _receive_misses = 0;
+                    // _receive_misses = 0;
                 }
             }
            
-            UdpInterface _udp           
+            WiFiUDP& _udp;     
             unsigned char _incomingPacket[9];  // buffer for incoming packets
             bool _receiving_from_controller;
             int _packetSize;

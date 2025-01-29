@@ -5,16 +5,27 @@
 #include "MotorController.hpp"
 #include "UdpController.hpp"
 #include "AccelGyroController.hpp"
-#include "MeltyController.hpp"
 #include <Arduino.h>
 
 
 class BotController{    
     public:
-        BotController(LEDController& led_controller, MotorController& left_wheel_controller, MotorController& right_wheel_controller, PS2_ControllerInterface& ps2_controller, AccelGyroController& accel_gyro_controller, led(led_controller), left_wheel(left_wheel_controller), right_wheel(right_wheel_controller), ps2_controller(ps2_controller), accel_gyro(accel_gyro_controller){
-        motor_input_speed_top = MotorController::SPEED_TOP;
-        motor_input_speed_bottom = MotorController::SPEED_BOTTOM;
-       };
+        BotController(
+            LEDController& led_controller,
+            MotorController& left_wheel_controller,
+            MotorController& right_wheel_controller,
+            PS2_ControllerInterface& ps2_controller,
+            AccelGyroController& accel_gyro_controller
+        ) : 
+            led(led_controller),
+            left_wheel(left_wheel_controller),
+            right_wheel(right_wheel_controller),
+            ps2_controller(ps2_controller),
+            accel_gyro(accel_gyro_controller)
+        {
+            motor_input_speed_top = MotorController::SPEED_TOP;
+            motor_input_speed_bottom = MotorController::SPEED_BOTTOM;
+        };
 
         void begin(){
             led.begin();

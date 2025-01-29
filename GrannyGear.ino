@@ -3,11 +3,11 @@
 #include <WiFiUdp.h>
 #include <ESP32Servo.h>
 // #include <Wire.h>
-#include "MotorController.hpp"
-#include "AccelGyroController.hpp"
-#include "LEDController.hpp"
-#include "UdpController.hpp"
-#include "BotController.hpp"
+#include "Robot/MotorController.hpp"
+#include "Robot/AccelGyroController.hpp"
+#include "Robot/LEDController.hpp"
+#include "Robot/UdpController.hpp"
+#include "Robot/BotController.hpp"
 // #include <ESPmDNS.h>
 
 
@@ -86,11 +86,11 @@ UdpInterface udp_interface{};
 PS2_ControllerInterface ps2_controller{udp_interface};
 DataLoggerInterface data_logger{udp_interface};
 
-BotController bot_controller{led_controller, left_motor_controller, right_motor_controller, udp_interface, accel_gyro};
+BotController bot_controller{led_controller, left_motor_controller, right_motor_controller, ps2_controller, accel_gyro};
 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(10);
   Serial.println('\n');
   //  Serial.printf("%f\t%f\t%f\t%f\t", desired_angular_velocity_rad_per_s, desired_centripetal_acceleration_ms2, desired_centripetal_acceleration_g, desired_measured_accel_x);
@@ -102,6 +102,7 @@ void setup() {
 
 void loop() {
     ps2_controller.ReadController();
+    Serial.printf("%d\n", ps2_controller.ReceivingFromController());
     if (ps2_controller.ReceivingFromController()){
       Serial.println("Received signal, driving.");
       bot_controller.drive();
@@ -224,20 +225,6 @@ void loop() {
 
 
 
-
-
-
-
-
-
-
-void TankDrive() {
-  
-}
-
-
-
-
 // int abs_max(int input, int max_abs_value) {
 //   if (input >= 0) {
 //     input = min(input, max_abs_value);
@@ -259,14 +246,14 @@ void TankDrive() {
 // //  }
 // }
 
-void TankOrMelty() {
-  if (udp_interface.get_RX() >= 150 | udp_interface.get_RX() <= 104) {
-    controlMode = 'M';
-  }
-  else {
-    controlMode = 'T';
-  }
-}
+// void TankOrMelty() {
+//   if (udp_interface.get_RX() >= 150 | udp_interface.get_RX() <= 104) {
+//     controlMode = 'M';
+//   }
+//   else {
+//     controlMode = 'T';
+//   }
+// }
 
 // void simple_feedback_loop() {
 //   change = 1;
@@ -292,10 +279,10 @@ void TankOrMelty() {
 //   }
 // }
 
-void constant_motor_control(){
-  leftWheelSpin = 1385;
-  rightWheelSpin = 1385;
-}
+// void constant_motor_control(){
+//   leftWheelSpin = 1385;
+//   rightWheelSpin = 1385;
+// }
 
 // void PID() {
 //   error = desired_measured_accel_x - accelerometer_x;
@@ -326,25 +313,25 @@ void constant_motor_control(){
 //   // Serial.printf("left_wheel: %d\tright_wheel: %d\n", leftWheelForward, rightWheelForward);
 // }
 
-void Translate(){
-  forward = map(udp_interface.get_LY(), 0, 255, 127, -127);
-  leftWheelTranslate = 0;
-  rightWheelTranslate = 0;
-  int translate_throttle = 40;
-  int adjusted_heading = heading / 100;
-  if(forward > 50){
-    if((adjusted_heading < 45 or adjusted_heading > 360 - 45)){
-      leftWheelTranslate = translate_throttle;
-      rightWheelTranslate = translate_throttle;
-//      Serial.println("Translating");
-      }
-    else if (adjusted_heading > 180 - 45 and adjusted_heading < 180 + 45){
-      leftWheelTranslate = -translate_throttle;
-      rightWheelTranslate = -translate_throttle;
-//      Serial.println("Translating");
-    }
-  }
-}
+// void Translate(){
+//   forward = map(udp_interface.get_LY(), 0, 255, 127, -127);
+//   leftWheelTranslate = 0;
+//   rightWheelTranslate = 0;
+//   int translate_throttle = 40;
+//   int adjusted_heading = heading / 100;
+//   if(forward > 50){
+//     if((adjusted_heading < 45 or adjusted_heading > 360 - 45)){
+//       leftWheelTranslate = translate_throttle;
+//       rightWheelTranslate = translate_throttle;
+// //      Serial.println("Translating");
+//       }
+//     else if (adjusted_heading > 180 - 45 and adjusted_heading < 180 + 45){
+//       leftWheelTranslate = -translate_throttle;
+//       rightWheelTranslate = -translate_throttle;
+// //      Serial.println("Translating");
+//     }
+//   }
+// }
 
 // int get_diff_error(){
 //   long sum_first_five = 0;  // sum will be larger than an item, long for safety.

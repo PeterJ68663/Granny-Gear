@@ -23,6 +23,7 @@ const int deadbandWidth = 50;
 const char* moustache_ssid     = "Moustache AP";         // The SSID (name) of the Wi-Fi network you want to connect to
 const char* moustache_password = "thereentnospoon";     // The password of the Wi-Fi network
 const char* moustache_ip = "192.168.1.11";
+const char* moustache_port = 4210 // port to send UDP packets to
 
 WiFiUDP Udp;
 unsigned int localUdpPort = 4210;  // local port to listen on
@@ -205,9 +206,9 @@ void loop() {
   message[8] = ((unsigned char*) &throt1)[0];
 
   if (timeSinceLastPacketSent >= 10) { //TODO: rm if statement. Useful to change 10 -> 1000 when debugging.
+    Serial.println("Attempting to send udp packet");
     timeSinceLastPacketSent = 0;
-//    Serial.println("Attempting to send udp packet");
-    Udp.beginPacket(moustache_ip, 4210);
+    Udp.beginPacket(moustache_ip, moustache_port);
     Udp.write(message, sizeof(message));
     Udp.endPacket();
   }
