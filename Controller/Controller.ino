@@ -23,7 +23,7 @@ const int deadbandWidth = 50;
 const char* moustache_ssid     = "Moustache AP";         // The SSID (name) of the Wi-Fi network you want to connect to
 const char* moustache_password = "lostinthespoom";     // The password of the Wi-Fi network
 const char* moustache_ip = "192.168.1.11";
-const char* moustache_port = 4210 // port to send UDP packets to
+const int moustache_port = 4210; // port to send UDP packets to
 
 WiFiUDP Udp;
 unsigned int localUdpPort = 4210;  // local port to listen on
