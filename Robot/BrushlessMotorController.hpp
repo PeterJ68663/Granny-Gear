@@ -1,7 +1,7 @@
 #ifndef _MOTOR_CONTROLLER_
 #define _MOTOR_CONTROLLER_
 
-#include <ESP32Servo.h>
+#include <Servo.h>
 
 
 class MotorController {
