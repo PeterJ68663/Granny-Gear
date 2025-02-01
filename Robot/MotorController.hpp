@@ -7,8 +7,8 @@
 class MotorController {
 
     public:
-        static const int SPEED_TOP = 100;
-        static const int SPEED_BOTTOM = -100;
+        static const int INPUT_SPEED_TOP = 100;
+        static const int INPUT_SPEED_BOTTOM = -100;
 
         MotorController(int esc_pin, int servo_min, int servo_mid, int servo_max){
             _esc_pin = esc_pin;
@@ -24,7 +24,7 @@ class MotorController {
         void drive(int speed){
             _forward = speed;
             // Serial.printf("Writing %d to ESC\n", _servo_mid + _forward);
-            speed = constrain(speed, SPEED_BOTTOM, SPEED_TOP);
+            speed = constrain(speed, INPUT_SPEED_BOTTOM, INPUT_SPEED_TOP);
             _controller.writeMicroseconds(_servo_mid + speed);
         };
         void stop(){
