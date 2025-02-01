@@ -23,9 +23,10 @@ class MotorController {
         }
         void drive(int speed){
             _forward = speed;
-            // Serial.printf("Writing %d to ESC\n", _servo_mid + _forward);
             speed = constrain(speed, INPUT_SPEED_BOTTOM, INPUT_SPEED_TOP);
-            _controller.writeMicroseconds(_servo_mid + speed);
+            int servo_speed = map(speed, INPUT_SPEED_BOTTOM, INPUT_SPEED_TOP, _servo_min, _servo_max);
+            Serial.printf("Drive called with %d;\tWriting %d to ESC\n", servo_speed);
+            _controller.writeMicroseconds(servo_speed);
         };
         void stop(){
             _controller.writeMicroseconds(_servo_mid);

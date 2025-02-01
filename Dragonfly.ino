@@ -43,7 +43,7 @@ UdpInterface udp_interface{};
 PS2_ControllerInterface ps2_controller{udp_interface};
 DataLoggerInterface data_logger{udp_interface};
 
-BotController bot_controller{led_controller, left_spinner_controller, right_spinner_controller, ps2_controller, accel_gyro};
+BotController bot_controller{led_controller, left_spinner_controller, right_spinner_controller, drive_motor_controller, ps2_controller, accel_gyro};
 
 
 void setup() {

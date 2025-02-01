@@ -46,25 +46,15 @@ class BotController{
         };
 
         void drive(){
-            // if (melty_mode){
-            //     Serial.println("Melty mode not yet implemented.");
-            // }
-            // else{
-            //     led.on();
-            //     _tank_drive();
-            // }
-            // left_spinner.drive(wheel_forward);
-            // right_spinner.drive(right_wheel_forward);
-
-
+            led.on();
             int LX = ps2_controller.get_LX(), LY = ps2_controller.get_LY();
             // Serial.printf("LX = %d\t LY = %d\n", LX, LY);
-            forward = map(ps2_controller.get_LY(), 254, 0, -1024, 1024);
+            forward = map(ps2_controller.get_LY(), 254, 0, MotorController::INPUT_SPEED_BOTTOM, MotorController::INPUT_SPEED_TOP);
             right = map(ps2_controller.get_LX(), 0, 254, -256, 256); //mapping from 254 instead of 255 as using 255 gives 127.5 as midpoint and resulting rounding error leads to small motor signal at rest.
             // printf("Forward = %d\t Right = %d\n", forward, right);
-            //Mixing:
-            wheel_forward = constrain(forward + right, -1024, 1024);
-            wheel_forward = map(wheel_forward, -1024, 1024, MotorController::INPUT_SPEED_BOTTOM, MotorController::INPUT_SPEED_TOP);
+            drive_motor.drive(forward);
+            
+            
         }
 
     private:
@@ -79,6 +69,8 @@ class BotController{
         int right = 0;
         int spinner_input_speed_top;
         int spinner_input_speed_bottom;
+        int drive_motor_input_speed_top;
+        int drive_motor_input_speed_bottom;
         int wheel_forward = 0;
 
 };
