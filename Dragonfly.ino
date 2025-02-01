@@ -13,9 +13,9 @@
 
 
 
-const int LEFT_SPINNER_ESC_PIN = 12; //D8
-const int RIGHT_SPINNER_ESC_PIN = 14; //D7
-const int DRIVE_ESC_PIN = 16; //D3
+const int LEFT_SPINNER_ESC_PIN = 12; //D6
+const int RIGHT_SPINNER_ESC_PIN = 14; //D5
+const int DRIVE_ESC_PIN = 16; //D0
 const int SPINNER_SERVO_MIN = 1000;
 const int SPINNER_SERVO_MID = 1500;
 const int SPINNER_SERVO_MAX = 2000;
@@ -70,4 +70,43 @@ void loop() {
     }
     delay(10);
 }
+
+
+
+// Just write 1600 um pwm to all GPIO pins: 
+// #include <Servo.h>
+
+// Servo esc1, esc2, esc3, esc4, esc5, esc6, esc7, esc8, esc9;
+
+// void setup() {
+//   esc1.attach(12);
+//   // esc2.attach(14);
+//   esc3.attach(16);
+//   // esc4.attach(5);
+//   // esc5.attach(4);
+//   // esc6.attach(0);
+//   // esc7.attach(2);
+//   // esc8.attach(15);
+//   // esc9.attach(13);
+//   // esc1.writeMicroseconds(2000);
+//   // delay(2000);
+//   // esc1.writeMicroseconds(1000);
+//   // delay(2000);
+//   // esc1.writeMicroseconds(1500);
+//   // delay(2000);
+// }
+
+// void loop() {
+//   // put your main code here, to run repeatedly:
+//   esc1.writeMicroseconds(1700);
+//   // esc2.writeMicroseconds(1000);
+//   esc3.write(1400);
+//   // esc4.writeMicroseconds(1000);
+//   // esc5.writeMicroseconds(1000);
+//   // esc6.writeMicroseconds(1000);
+//   // esc7.writeMicroseconds(1000);
+//   // esc8.writeMicroseconds(1000);
+//   // esc9.writeMicroseconds(1000);
+//   delay(10);
+// }
 

@@ -12,9 +12,9 @@ class BotController{
     public:
         BotController(
             LEDController& led_controller,
-            MotorController& drive_motor_controller,
             MotorController& left_spinner_controller,
             MotorController& right_spinner_controller,
+            MotorController& drive_motor_controller,
             PS2_ControllerInterface& ps2_controller,
             AccelGyroController& accel_gyro_controller
         ) : 
@@ -36,6 +36,12 @@ class BotController{
             left_spinner.begin();
             right_spinner.begin();
             drive_motor.begin();
+            // drive_motor.drive(100);
+            // delay(2000);
+            // drive_motor.drive(-100);
+            // delay(2000);
+            // drive_motor.drive(0);
+            // delay(2000);
         };
 
         void stop(){

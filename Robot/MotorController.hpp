@@ -17,17 +17,17 @@ class MotorController {
             _servo_max = servo_max;
         };
         void begin(){
-            _controller.attach(_esc_pin);
-            _controller.writeMicroseconds(_servo_mid);
+            _pwm_writer.attach(_esc_pin);
+            _pwm_writer.writeMicroseconds(_servo_mid);
         }
         void drive(int forward){
             forward = constrain(forward, INPUT_SPEED_BOTTOM, INPUT_SPEED_TOP);
             int servo_speed = map(forward, INPUT_SPEED_BOTTOM, INPUT_SPEED_TOP, _servo_min, _servo_max);
             Serial.printf("Drive called with %d;\tWriting %d to ESC\n", forward, servo_speed);
-            _controller.writeMicroseconds(servo_speed);
+            _pwm_writer.writeMicroseconds(servo_speed);
         };
         void stop(){
-            _controller.writeMicroseconds(_servo_mid);
+            _pwm_writer.writeMicroseconds(_servo_mid);
         };
 
     private:
@@ -36,7 +36,7 @@ class MotorController {
         int _servo_max;
 
         int _esc_pin;
-        Servo _controller;
+        Servo _pwm_writer;
 };
 
 #endif
