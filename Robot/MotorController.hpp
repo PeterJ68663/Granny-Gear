@@ -15,17 +15,15 @@ class MotorController {
             _servo_min = servo_min;
             _servo_mid = servo_mid;
             _servo_max = servo_max;
-            _forward = 0;
         };
         void begin(){
             _controller.attach(_esc_pin);
             _controller.writeMicroseconds(_servo_mid);
         }
-        void drive(int speed){
-            _forward = speed;
-            speed = constrain(speed, INPUT_SPEED_BOTTOM, INPUT_SPEED_TOP);
-            int servo_speed = map(speed, INPUT_SPEED_BOTTOM, INPUT_SPEED_TOP, _servo_min, _servo_max);
-            Serial.printf("Drive called with %d;\tWriting %d to ESC\n", servo_speed);
+        void drive(int forward){
+            forward = constrain(forward, INPUT_SPEED_BOTTOM, INPUT_SPEED_TOP);
+            int servo_speed = map(forward, INPUT_SPEED_BOTTOM, INPUT_SPEED_TOP, _servo_min, _servo_max);
+            Serial.printf("Drive called with %d;\tWriting %d to ESC\n", forward, servo_speed);
             _controller.writeMicroseconds(servo_speed);
         };
         void stop(){
@@ -39,7 +37,6 @@ class MotorController {
 
         int _esc_pin;
         Servo _controller;
-        int _forward; //Number between 600 and -600 determining how hard and in what direction to drive the motor.
 };
 
 #endif

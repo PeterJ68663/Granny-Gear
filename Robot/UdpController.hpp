@@ -89,10 +89,8 @@ class PS2_ControllerInterface{
                 _packetSize = _udp.parsePacket();
                 if (_packetSize) {
                     _receiving_from_controller = true;
-                    Serial.printf("Set _receiving_from_controller to %d\n", _receiving_from_controller);
-                    Serial.printf("And the getter returns %d\n", ReceivingFromController());
                     _receive_misses = 0;
-                    Serial.printf("Received %d bytes from %s, port %d\n", _packetSize, _udp.remoteIP().toString().c_str(), _udp.remotePort());
+                    // Serial.printf("Received %d bytes from %s, port %d\n", _packetSize, _udp.remoteIP().toString().c_str(), _udp.remotePort());
                     _read_incoming_packet();
                     _packetSize = 0;
                 }
@@ -136,9 +134,6 @@ class PS2_ControllerInterface{
             void _read_incoming_packet(){
                 int len = _udp.read(_incomingPacket, 9);
                 if (len > 0){
-                    Serial.printf("Getter A: %d\n", ReceivingFromController());
-                    // _incomingPacket[len] = 0;  // Todo: Don't know what this was for. Seems to work without it, so maybe delete?? Also this line is overwriting _receiving_from_controller!!! I think because it's a zero indexed array of length 9, so the 9th position falls off the end of the array.
-                    Serial.printf("Getter B: %d\n", ReceivingFromController());
                     unsigned char* command = _incomingPacket;
                     _LX = command[0];
                     _LY = command[1];
