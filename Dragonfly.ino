@@ -1,8 +1,9 @@
 #include <Arduino.h>
-#include <WiFi.h>        // Include the Wi-Fi library
+#include <ESP8266WiFi.h>        // Include the Wi-Fi library
 #include <WiFiUdp.h>
-#include <ESP32Servo.h>
+#include <Servo.h>
 // #include <Wire.h>
+#include "Robot/MotorController.hpp"
 #include "Robot/MotorController.hpp"
 #include "Robot/AccelGyroController.hpp"
 #include "Robot/LEDController.hpp"
@@ -18,9 +19,6 @@ const int rightESCPin = 2; //D7
 const int LEDpin = 5;
 
 int forward = 0, right = 0;
-int leftWheelForward = 0, rightWheelForward = 0;
-int leftWheelSpin = 0, rightWheelSpin = 0, leftWheelTranslate = 0, rightWheelTranslate = 0;
-bool inverted = false;
 
 
 
@@ -112,4 +110,5 @@ void loop() {
       bot_controller.stop();
     }
     delay(10);
+}
 

@@ -2,13 +2,13 @@
 #define _UDP_CONTROLLER_
 
 #include <Arduino.h>
-#include <WiFi.h>        // Include the Wi-Fi library
+#include <ESP8266WiFi.h>        // Include the Wi-Fi library
 #include <WiFiUDP.h>
 
 
 unsigned int localUdpPort = 4210;  // local port to listen on
 const char *subnet_ssid = "Moustache AP"; // The name of the Wi-Fi network that will be created
-const char *subnet_password = "thereentnospoon";   // The password required to connect to it, leave blank for an open network
+const char *subnet_password = "lostinthespoom";   // The password required to connect to it, leave blank for an open network
 const char* data_logger_ip = "255.255.255.255"; //"192.168.1.110";
 const int max_receive_misses_before_cutout = 750;
 

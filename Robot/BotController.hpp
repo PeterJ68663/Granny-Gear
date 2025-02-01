@@ -12,31 +12,34 @@ class BotController{
     public:
         BotController(
             LEDController& led_controller,
-            MotorController& left_wheel_controller,
-            MotorController& right_wheel_controller,
+            MotorController& drive_motor_controller,
+            MotorController& left_spinner_controller,
+            MotorController& right_spinner_controller,
             PS2_ControllerInterface& ps2_controller,
             AccelGyroController& accel_gyro_controller
         ) : 
             led(led_controller),
-            left_wheel(left_wheel_controller),
-            right_wheel(right_wheel_controller),
+            left_spinner(left_spinner_controller),
+            right_spinner(right_spinner_controller),
             ps2_controller(ps2_controller),
             accel_gyro(accel_gyro_controller)
         {
-            motor_input_speed_top = MotorController::SPEED_TOP;
-            motor_input_speed_bottom = MotorController::SPEED_BOTTOM;
+            drive_motor_input_speed_top = MotorController::SPEED_TOP;
+            drive_motor_input_speed_bottom = MotorController::SPEED_BOTTOM;
+            spinner_input_speed_top = MotorController::SPEED_TOP;
+            spinner_input_speed_bottom = MotorController::SPEED_BOTTOM;
         };
 
         void begin(){
             led.begin();
-            left_wheel.begin();
-            right_wheel.begin();
+            left_spinner.begin();
+            right_spinner.begin();
         };
 
         void stop(){
             led.off();
-            left_wheel.stop();
-            right_wheel.stop();
+            left_spinner.stop();
+            right_spinner.stop();
         };
 
         void drive(){
@@ -47,22 +50,23 @@ class BotController{
                 led.on();
                 _tank_drive();
             }
-            left_wheel.drive(left_wheel_forward);
-            right_wheel.drive(right_wheel_forward);
+            left_spinner.drive(left_wheel_forward);
+            right_spinner.drive(right_wheel_forward);
         }
 
     private:
         LEDController &led;
-        MotorController &left_wheel;
-        MotorController &right_wheel;
+        MotorController &left_spinner;
+        MotorController &right_spinner;
+        MotorController &drive_motor;
         PS2_ControllerInterface &ps2_controller;
         AccelGyroController &accel_gyro;
 
         bool melty_mode = false; //If false, tank mode.
         int forward = 0;
         int right = 0;
-        int motor_input_speed_top;
-        int motor_input_speed_bottom;
+        int spinner_input_speed_top;
+        int spinner_input_speed_bottom;
         int left_wheel_forward = 0;
         int right_wheel_forward = 0;
 
