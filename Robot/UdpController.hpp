@@ -144,8 +144,7 @@ class PS2_ControllerInterface{
                     _max_melty_throttle = 1500 + command[8];
                     // Serial.printf("%d\t%d\t%d\t%d\t%d\n", command[4], command[5], command[6], command[7], command[8]);
                     //  Serial.printf("Spin speed: %d\tMax throttle: %d\n", measured_rpm, _max_melty_throttle);
-                    Serial.printf("UDP packet contents: %d\t%d\t%d\t%d\t%d\n", _LX, _LY, _RX, _left_pressed, _right_pressed);
-                    Serial.printf("And the getter is now: %d\n", ReceivingFromController());
+                    // Serial.printf("UDP packet contents: %d\t%d\t%d\t%d\t%d\n", _LX, _LY, _RX, _left_pressed, _right_pressed);
                 }
                 else {
                     Serial.println("Failed to read packet.");

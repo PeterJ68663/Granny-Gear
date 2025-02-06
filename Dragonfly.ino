@@ -61,7 +61,7 @@ void loop() {
     ps2_controller.ReadController();
     Serial.printf("%d\n", ps2_controller.ReceivingFromController());
     if (ps2_controller.ReceivingFromController()){
-      Serial.println("Received signal, driving.");
+      // Serial.println("Received signal, driving.");
       bot_controller.drive();
     }
     else{
