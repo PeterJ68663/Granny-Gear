@@ -56,6 +56,7 @@ void setup() {
   delay(10);
   bot_controller.begin();
   bot_controller.stop();
+  Serial.println("Setup complete.");
 }
 
 void loop() {
