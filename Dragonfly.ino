@@ -9,9 +9,8 @@
 #include "Robot/LEDController.hpp"
 #include "Robot/UdpController.hpp"
 #include "Robot/BotController.hpp"
+#include "secrets.h"
 // #include <ESPmDNS.h>
-
-
 
 const int LEFT_SPINNER_ESC_PIN = 12; //D6
 const int RIGHT_SPINNER_ESC_PIN = 14; //D5
@@ -39,7 +38,7 @@ MotorController left_spinner_controller{LEFT_SPINNER_ESC_PIN, SPINNER_SERVO_MIN,
 MotorController right_spinner_controller{RIGHT_SPINNER_ESC_PIN, SPINNER_SERVO_MIN, SPINNER_SERVO_MID, SPINNER_SERVO_MAX};
 MotorController drive_motor_controller{DRIVE_ESC_PIN, DRIVE_SERVO_MIN, DRIVE_SERVO_MID, DRIVE_SERVO_MAX};
 
-UdpInterface udp_interface{};
+UdpInterface udp_interface{WIFI_SSID, WIFI_PASSWORD};
 PS2_ControllerInterface ps2_controller{udp_interface};
 DataLoggerInterface data_logger{udp_interface};
 

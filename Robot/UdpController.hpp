@@ -7,8 +7,6 @@
 
 
 unsigned int localUdpPort = 4210;  // local port to listen on
-const char *subnet_ssid = "Moustache AP"; // The name of the Wi-Fi network that will be created
-const char *subnet_password = "lostinthespoom";   // The password required to connect to it, leave blank for an open network
 const char* data_logger_ip = "255.255.255.255"; //"192.168.1.110";
 const int max_receive_misses_before_cutout = 750;
 
@@ -18,11 +16,20 @@ class UdpInterface{
 
     public:  
 
-        WiFiUDP Udp;
-
+        UdpInterface(
+            const char* subnet_ssid,
+            const char* subnet_password
+        )
+        {
+            _subnet_ssid = subnet_ssid;
+            _subnet_password = subnet_password;
+        }
         void begin(){
             _setup_for_udp();
         }
+
+        WiFiUDP Udp;
+
 
     private:
 
@@ -39,15 +46,18 @@ class UdpInterface{
 
             //Fix the ip
             WiFi.softAPConfig(staticIP, gateway, subnet);
-            WiFi.softAP(subnet_ssid, subnet_password);
+            WiFi.softAP(_subnet_ssid, _subnet_password);
             Serial.print("Access Point \"");
-            Serial.print(subnet_ssid);
+            Serial.print(_subnet_ssid);
             Serial.println("\" started");
 
             Serial.print("IP address:\t");
             Serial.println(WiFi.softAPIP());         // Send the IP address of the ESP to the computer
             delay(20);
         }
+
+        const char* _subnet_ssid;
+        const char* _subnet_password;
 };
 
 
