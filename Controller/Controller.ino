@@ -2,6 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 #include <PS2X_lib.h>  //for v1.6
+#include "secrets.h"
 
 //PS2X Stuff:
 #define PS2_DAT        12  //D6      
@@ -20,8 +21,6 @@ byte vibrate = 0;
 
 const int deadbandWidth = 50;
 
-const char* moustache_ssid     = "Moustache AP";         // The SSID (name) of the Wi-Fi network you want to connect to
-const char* moustache_password = "lostinthespoom";     // The password of the Wi-Fi network
 const char* moustache_ip = "192.168.1.11";
 const int moustache_port = 4210; // port to send UDP packets to
 
@@ -80,28 +79,7 @@ void setup() {
       break;
    }
 
-  // Connect to the network
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(moustache_ssid, moustache_password);
-  Serial.print("Connecting to ");
-  Serial.print(moustache_ssid); Serial.println(" ...");
-  int i = 0;
-  while (WiFi.status() != WL_CONNECTED) { // Wait for the Wi-Fi to connect
-    delay(1000);
-    Serial.print(++i); Serial.print(' ');
-  }
-  Serial.println('\n');
-  Serial.println("Connection established!");
-  Serial.print("IP address:\t");
-  Serial.println(WiFi.localIP());         // Send the IP address of the ESP8266 to the computer
-
-  if (! Udp.begin(localUdpPort)) {
-    Serial.println("Udp failed to start. No sockets available to use.");
-  }
-
-  WiFi.printDiag(Serial);
-
-  Udp.begin(localUdpPort);
+  wifi_setup(Udp, WIFI_SSID, WIFI_PASSWORD);
 
 }
 
@@ -238,4 +216,29 @@ unsigned char BoolsToByte(bool b[8])
         if (b[i])
             c |= 1 << i;
     return c;
+}
+
+void wifi_setup(WiFiUDP Udp, const char* bot_subnet_ssid, const char* bot_subnet_password) {
+    // Connect to the network
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(bot_subnet_ssid, bot_subnet_password);
+  Serial.print("Connecting to ");
+  Serial.print(bot_subnet_ssid); Serial.println(" ...");
+  int i = 0;
+  while (WiFi.status() != WL_CONNECTED) { // Wait for the Wi-Fi to connect
+    delay(1000);
+    Serial.print(++i); Serial.print(' ');
+  }
+  Serial.println('\n');
+  Serial.println("Connection established!");
+  Serial.print("IP address:\t");
+  Serial.println(WiFi.localIP());         // Send the IP address of the ESP8266 to the computer
+
+  if (! Udp.begin(localUdpPort)) {
+    Serial.println("Udp failed to start. No sockets available to use.");
+  }
+
+  WiFi.printDiag(Serial);
+
+  Udp.begin(localUdpPort);
 }
