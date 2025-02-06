@@ -49,22 +49,23 @@ void setup() {
   Serial.begin(115200);
   delay(10);
   Serial.println('\n');
-  //  Serial.printf("%f\t%f\t%f\t%f\t", desired_angular_velocity_rad_per_s, desired_centripetal_acceleration_ms2, desired_centripetal_acceleration_g, desired_measured_accel_x);
 
   udp_interface.begin();
+  delay(10);
   accel_gyro.begin();
+  delay(10);
   bot_controller.begin();
+  bot_controller.stop();
 }
 
 void loop() {
     ps2_controller.ReadController();
-    Serial.printf("%d\n", ps2_controller.ReceivingFromController());
     if (ps2_controller.ReceivingFromController()){
       // Serial.println("Received signal, driving.");
       bot_controller.drive();
     }
     else{
-      Serial.println("No signal, stopping.");
+      // Serial.println("No signal, stopping.");
       bot_controller.stop();
     }
     delay(10);

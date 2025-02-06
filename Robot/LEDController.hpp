@@ -14,6 +14,10 @@ class LEDController {
             pinMode(_pin, OUTPUT);
             digitalWrite(_pin, LOW);
             _on = false;
+
+            Serial.begin(115200);
+            delay(10);
+            Serial.printf("LED Controller Started at %d\n", millis());
         }
         void on(){
             digitalWrite(_pin, HIGH);

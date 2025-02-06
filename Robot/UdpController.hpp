@@ -26,6 +26,10 @@ class UdpInterface{
         }
         void begin(){
             _setup_for_udp();
+
+            Serial.begin(115200);
+            delay(10);
+            Serial.printf("UDP Interface Started at %d\n", millis());
         }
 
         WiFiUDP Udp;
@@ -163,11 +167,10 @@ class PS2_ControllerInterface{
             }
 
             void HandleNoSignal() {
-                Serial.printf("No signal. Receive misses = %d\n", _receive_misses);
+                // Serial.printf("No signal. Receive misses = %d\n", _receive_misses);
                 _receive_misses++;
                 if (_receive_misses >= max_receive_misses_before_cutout) {
                     _receiving_from_controller = false;
-                    // _receive_misses = 0;
                 }
             }
            

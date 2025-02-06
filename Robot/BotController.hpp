@@ -33,9 +33,18 @@ class BotController{
 
         void begin(){
             led.begin();
+            delay(10);
             left_spinner.begin();
+            delay(10);
             right_spinner.begin();
+            delay(10);
             drive_motor.begin();
+
+            Serial.begin(115200);
+            delay(10);
+            Serial.printf("Bot Controller Started at %d\n", millis());
+
+            // One time setup for drive motor speed controller:
             // drive_motor.drive(100);
             // delay(2000);
             // drive_motor.drive(-100);

@@ -47,6 +47,10 @@ class AccelGyroController{
             //  Serial.println(AFS_SEL);
 
             read_accelerometer();
+            
+            Serial.begin(115200);
+            delay(10);
+            Serial.printf("AccelGyro Controller Started at %d\n", millis());
     }
 
         int16_t get_accel_x(){

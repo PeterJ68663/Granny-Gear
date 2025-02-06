@@ -19,6 +19,10 @@ class MotorController {
         void begin(){
             _pwm_writer.attach(_esc_pin);
             _pwm_writer.writeMicroseconds(_servo_mid);
+
+            Serial.begin(115200);
+            delay(10);
+            Serial.printf("Motor Controller Started at %d\n", millis());
         }
         void drive(int speed){
             _speed = constrain(speed, INPUT_SPEED_BOTTOM, INPUT_SPEED_TOP);
