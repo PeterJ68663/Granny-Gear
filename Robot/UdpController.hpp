@@ -8,7 +8,7 @@
 
 unsigned int localUdpPort = 4210;  // local port to listen on
 const char* data_logger_ip = "255.255.255.255"; //"192.168.1.110";
-const int max_receive_misses_before_cutout = 750;
+// const int max_receive_misses_before_cutout = 750;
 
 
 
@@ -102,9 +102,8 @@ class PS2_ControllerInterface{
                 // Serial.println("Attempting to read controller");
                 _packetSize = _udp.parsePacket();
                 if (_packetSize) {
-                    _receiving_from_controller = true;
-                    _receive_misses = 0;
-                    // Serial.printf("Received %d bytes from %s, port %d\n", _packetSize, _udp.remoteIP().toString().c_str(), _udp.remotePort());
+                    // _receive_misses = 0;
+                    Serial.printf("Received %d bytes from %s, port %d\n", _packetSize, _udp.remoteIP().toString().c_str(), _udp.remotePort());
                     _read_incoming_packet();
                     _packetSize = 0;
                 }
@@ -148,6 +147,8 @@ class PS2_ControllerInterface{
             void _read_incoming_packet(){
                 int len = _udp.read(_incomingPacket, 9);
                 if (len > 0){
+                    _last_receive_time = millis();
+                    _receiving_from_controller = true;
                     unsigned char* command = _incomingPacket;
                     _LX = command[0];
                     _LY = command[1];
@@ -168,8 +169,9 @@ class PS2_ControllerInterface{
 
             void HandleNoSignal() {
                 // Serial.printf("No signal. Receive misses = %d\n", _receive_misses);
-                _receive_misses++;
-                if (_receive_misses >= max_receive_misses_before_cutout) {
+                // _receive_misses++;
+                // if (_receive_misses >= max_receive_misses_before_cutout) {
+                if (_last_receive_time < millis() - _max_time_without_signal_before_cutout) {
                     _receiving_from_controller = false;
                 }
             }
@@ -185,8 +187,10 @@ class PS2_ControllerInterface{
             bool _right_pressed = false;
             bool _up_pressed = false;
             bool _down_pressed = false;
-            int _receive_misses = 0;
+            // int _receive_misses = 0;
+            int _last_receive_time = -9999999;
             int _max_melty_throttle;
+            const int _max_time_without_signal_before_cutout = 1000;
 };
 
 #endif
