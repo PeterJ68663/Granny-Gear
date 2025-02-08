@@ -5,11 +5,12 @@
 #include <ESP8266WiFi.h>        // Include the Wi-Fi library
 #include <WiFiUDP.h>
 
+#include "ButtonState.hpp"
+
+
 
 unsigned int localUdpPort = 4210;  // local port to listen on
 const char* data_logger_ip = "255.255.255.255"; //"192.168.1.110";
-// const int max_receive_misses_before_cutout = 750;
-
 
 
 class UdpInterface{
@@ -102,8 +103,7 @@ class PS2_ControllerInterface{
                 // Serial.println("Attempting to read controller");
                 _packetSize = _udp.parsePacket();
                 if (_packetSize) {
-                    // _receive_misses = 0;
-                    Serial.printf("Received %d bytes from %s, port %d\n", _packetSize, _udp.remoteIP().toString().c_str(), _udp.remotePort());
+                    // Serial.printf("Received %d bytes from %s, port %d\n", _packetSize, _udp.remoteIP().toString().c_str(), _udp.remotePort());
                     _read_incoming_packet();
                     _packetSize = 0;
                 }
@@ -111,6 +111,10 @@ class PS2_ControllerInterface{
                     HandleNoSignal();
                 }
             }
+            bool ReceivingFromController(){
+                return _receiving_from_controller;
+            }
+
             unsigned char get_LX(){
                 return _LX;
             }
@@ -120,20 +124,41 @@ class PS2_ControllerInterface{
             unsigned char get_RX(){
                 return _RX;
             }
-            bool LeftPressed(){
+            bool left_pressed(){
                 return _left_pressed;
             }
-            bool RightPressed(){
+            bool right_pressed(){
                 return _right_pressed;
             }
-            bool UpPressed(){
+            bool up_pressed(){
                 return _up_pressed;
             }
-            bool DownPressed(){
+            bool down_pressed(){
                 return _down_pressed;
             }
-            bool ReceivingFromController(){
-                return _receiving_from_controller;
+            bool left_state(){
+                return _left_state.get_button_state();
+            }
+            bool right_state(){
+                return _right_state.get_button_state();
+            }
+            bool up_state(){
+                return _up_state.get_button_state();
+            }
+            bool down_state(){
+                return _down_state.get_button_state();
+            }
+            bool square_pressed(){
+                return _square_pressed;
+            }
+            bool triangle_pressed(){
+                return _triangle_pressed;
+            }
+            bool circle_pressed(){
+                return _circle_pressed;
+            }
+            bool cross_pressed(){
+                return _cross_pressed;
             }
 
         private:
@@ -142,6 +167,10 @@ class PS2_ControllerInterface{
                 _right_pressed = (buttons & (1<<1)) != 0;
                 _up_pressed = (buttons & (1<<2)) != 0;
                 _down_pressed = (buttons & (1<<3)) != 0;
+                _square_pressed = (buttons & (1<<4)) != 0;
+                _circle_pressed = (buttons & (1<<5)) != 0;
+                _triangle_pressed = (buttons & (1<<6)) != 0;
+                _cross_pressed = (buttons & (1<<7)) != 0;
             }
 
             void _read_incoming_packet(){
@@ -160,6 +189,7 @@ class PS2_ControllerInterface{
                     // Serial.printf("%d\t%d\t%d\t%d\t%d\n", command[4], command[5], command[6], command[7], command[8]);
                     //  Serial.printf("Spin speed: %d\tMax throttle: %d\n", measured_rpm, _max_melty_throttle);
                     // Serial.printf("UDP packet contents: %d\t%d\t%d\t%d\t%d\n", _LX, _LY, _RX, _left_pressed, _right_pressed);
+                    // Serial.printf("Left = %d\n", _left_pressed);
                 }
                 else {
                     Serial.println("Failed to read packet.");
@@ -168,9 +198,7 @@ class PS2_ControllerInterface{
             }
 
             void HandleNoSignal() {
-                // Serial.printf("No signal. Receive misses = %d\n", _receive_misses);
-                // _receive_misses++;
-                // if (_receive_misses >= max_receive_misses_before_cutout) {
+                // Serial.printf("No signal. Last signal received %d ms ago.\n", millis() - _last_receive_time);
                 if (_last_receive_time < millis() - _max_time_without_signal_before_cutout) {
                     _receiving_from_controller = false;
                 }
@@ -187,7 +215,14 @@ class PS2_ControllerInterface{
             bool _right_pressed = false;
             bool _up_pressed = false;
             bool _down_pressed = false;
-            // int _receive_misses = 0;
+            bool _square_pressed = false;
+            bool _circle_pressed = false;
+            bool _triangle_pressed = false;
+            bool _cross_pressed = false;
+            ButtonState _left_state = ButtonState(_left_pressed);
+            ButtonState _right_state = ButtonState(_right_pressed);
+            ButtonState _up_state = ButtonState(_up_pressed);
+            ButtonState _down_state = ButtonState(_down_pressed);
             int _last_receive_time = -9999999;
             int _max_melty_throttle;
             const int _max_time_without_signal_before_cutout = 1000;

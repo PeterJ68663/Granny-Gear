@@ -29,6 +29,13 @@ unsigned int localUdpPort = 4210;  // local port to listen on
 
 int timeSinceLastPacketSent = 0;
 
+const int send_button_presses_for = 25; //ms
+int up_last_pressed = -999;
+int down_last_pressed = -999;
+int left_last_pressed = -999;
+int right_last_pressed = -999;
+
+
 void setup() {
   Serial.begin(115200);         // Start the Serial communication to send messages to the computer
   delay(10);
@@ -115,26 +122,66 @@ void loop() {
 //  }
 //  unsigned char buttons = 0b00000011;
 
-  if(ps2x.ButtonPressed(PSB_PAD_LEFT)){
+  if (ps2x.ButtonPressed(PSB_PAD_LEFT)) {
     Serial.println("Left Pressed");
-//    delay(500);
+    left_last_pressed = millis();
+  }
+  if (millis() - left_last_pressed < send_button_presses_for) {
     buttons[0] = true;
-//    Serial.println("Left Pressed");
+    Serial.println("Left Sent");
   }
-  if(ps2x.ButtonPressed(PSB_PAD_RIGHT)){
+  else {
+    buttons[0] = false;
+  }
+
+  if (ps2x.ButtonPressed(PSB_PAD_RIGHT)) {
     Serial.println("Right Pressed");
-//    delay(500);
-    buttons[1] = true;
-//    Serial.println("Right Pressed");
+    right_last_pressed = millis();
   }
-  if(ps2x.ButtonPressed(PSB_PAD_UP)){
+  if (millis() - right_last_pressed < send_button_presses_for) {
+    buttons[1] = true;
+  }
+  else {
+    buttons[1] = false;
+  }
+
+  if (ps2x.ButtonPressed(PSB_PAD_UP)) {
     Serial.println("Up Pressed");
+    up_last_pressed = millis();
+  }
+  if (millis() - up_last_pressed < send_button_presses_for) {
     buttons[2] = true;
   }
-  if(ps2x.ButtonPressed(PSB_PAD_DOWN)){
+  else {
+    buttons[2] = false;
+  }
+
+  if (ps2x.ButtonPressed(PSB_PAD_DOWN)) {
     Serial.println("Down Pressed");
+    down_last_pressed = millis();
+  }
+  if (millis() - down_last_pressed < send_button_presses_for) {
     buttons[3] = true;
   }
+  else {
+    buttons[3] = false;
+  }
+
+
+//   if(ps2x.ButtonPressed(PSB_PAD_RIGHT)){
+//     Serial.println("Right Pressed");
+// //    delay(500);
+//     buttons[1] = true;
+// //    Serial.println("Right Pressed");
+//   }
+//   if(ps2x.ButtonPressed(PSB_PAD_UP)){
+//     Serial.println("Up Pressed");
+//     buttons[2] = true;
+//   }
+//   if(ps2x.ButtonPressed(PSB_PAD_DOWN)){
+//     Serial.println("Down Pressed");
+//     buttons[3] = true;
+//   }
   if(ps2x.ButtonPressed(PSAB_SQUARE)){
     Serial.println("Square Pressed");
     buttons[4] = true;
@@ -184,7 +231,7 @@ void loop() {
   message[8] = ((unsigned char*) &throt1)[0];
 
   if (timeSinceLastPacketSent >= 10) { //TODO: rm if statement. Useful to change 10 -> 1000 when debugging.
-    Serial.println("Attempting to send udp packet");
+    // Serial.println("Attempting to send udp packet");
     timeSinceLastPacketSent = 0;
     Udp.beginPacket(moustache_ip, moustache_port);
     Udp.write(message, sizeof(message));

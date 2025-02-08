@@ -7,14 +7,15 @@
 class MotorController {
 
     public:
-        static const int INPUT_SPEED_TOP = 100;
-        static const int INPUT_SPEED_BOTTOM = -100;
 
-        MotorController(int esc_pin, int servo_min, int servo_mid, int servo_max){
+        MotorController(const int esc_pin, const int servo_min, const int servo_mid, const int servo_max, const int input_range){
             _esc_pin = esc_pin;
             _servo_min = servo_min;
             _servo_mid = servo_mid;
             _servo_max = servo_max;
+            _input_min = - input_range / 2;
+            _input_max = - _input_min;
+            
         };
         void begin(){
             _pwm_writer.attach(_esc_pin);
@@ -25,9 +26,9 @@ class MotorController {
             Serial.printf("Motor Controller Started at %d\n", millis());
         }
         void drive(int speed){
-            _speed = constrain(speed, INPUT_SPEED_BOTTOM, INPUT_SPEED_TOP);
-            int servo_speed = map(speed, INPUT_SPEED_BOTTOM, INPUT_SPEED_TOP, _servo_min, _servo_max);
-            Serial.printf("Drive called with %d;\tWriting %d to ESC on pin\t%d\n", speed, servo_speed, _esc_pin);
+            _speed = constrain(speed, _input_min, _input_max);
+            int servo_speed = map(speed, _input_min, _input_max, _servo_min, _servo_max);
+            // Serial.printf("Drive called with %d;\tWriting %d to ESC on pin\t%d\n", speed, servo_speed, _esc_pin);
             _pwm_writer.writeMicroseconds(servo_speed);
         };
         void stop(){
@@ -37,12 +38,23 @@ class MotorController {
             return _speed;
         };
 
+        int get_max_input(){
+            return _input_max;
+        }
+
+        int get_min_input(){
+            return _input_min;
+        }
+
+
     private:
         int _servo_min;
         int _servo_mid;
         int _servo_max;
-        int _speed = 0;
+        int _input_min;
+        int _input_max;
         int _esc_pin;
+        int _speed = 0;
         Servo _pwm_writer;
 };
 

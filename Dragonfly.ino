@@ -21,6 +21,8 @@ const int SPINNER_SERVO_MAX = 2000;
 const int DRIVE_SERVO_MIN = 1000;
 const int DRIVE_SERVO_MID = 1500;
 const int DRIVE_SERVO_MAX = 2000;
+const int SPINNER_INPUT_RANGE = 1000;
+const int DRIVE_INPUT_RANGE = 200;
 
 const int LED_PIN = 2;
 
@@ -34,9 +36,9 @@ unsigned long time_this_accel_reading, time_last_accel_reading = 0, time_since_l
 //  Set up Controllers:
 AccelGyroController accel_gyro{};
 LEDController led_controller{LED_PIN};
-MotorController left_spinner_controller{LEFT_SPINNER_ESC_PIN, SPINNER_SERVO_MIN, SPINNER_SERVO_MID, SPINNER_SERVO_MAX};
-MotorController right_spinner_controller{RIGHT_SPINNER_ESC_PIN, SPINNER_SERVO_MIN, SPINNER_SERVO_MID, SPINNER_SERVO_MAX};
-MotorController drive_motor_controller{DRIVE_ESC_PIN, DRIVE_SERVO_MIN, DRIVE_SERVO_MID, DRIVE_SERVO_MAX};
+MotorController left_spinner_controller{LEFT_SPINNER_ESC_PIN, SPINNER_SERVO_MIN, SPINNER_SERVO_MID, SPINNER_SERVO_MAX, SPINNER_INPUT_RANGE};
+MotorController right_spinner_controller{RIGHT_SPINNER_ESC_PIN, SPINNER_SERVO_MIN, SPINNER_SERVO_MID, SPINNER_SERVO_MAX, SPINNER_INPUT_RANGE};
+MotorController drive_motor_controller{DRIVE_ESC_PIN, DRIVE_SERVO_MIN, DRIVE_SERVO_MID, DRIVE_SERVO_MAX, DRIVE_INPUT_RANGE};
 
 UdpInterface udp_interface{WIFI_SSID, WIFI_PASSWORD};
 PS2_ControllerInterface ps2_controller{udp_interface};
@@ -63,7 +65,7 @@ void loop() {
     ps2_controller.ReadController();
     if (ps2_controller.ReceivingFromController()){
       // Serial.println("Received signal, driving.");
-      bot_controller.drive();
+      bot_controller.fight();
     }
     else{
       // Serial.println("No signal, stopping.");

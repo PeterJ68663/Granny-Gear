@@ -25,10 +25,10 @@ class BotController{
             ps2_controller(ps2_controller),
             accel_gyro(accel_gyro_controller)
         {
-            _drive_motor_input_speed_top = MotorController::INPUT_SPEED_TOP;
-            _drive_motor_input_speed_bottom = MotorController::INPUT_SPEED_BOTTOM;
-            _spinner_input_speed_top = MotorController::INPUT_SPEED_TOP;
-            _spinner_input_speed_bottom = MotorController::INPUT_SPEED_BOTTOM;
+            _drive_motor_input_speed_top = drive_motor.get_max_input();
+            _drive_motor_input_speed_bottom = drive_motor.get_min_input();
+            _spinner_input_speed_top = left_spinner.get_max_input();
+            _spinner_input_speed_bottom = left_spinner.get_min_input();
         };
 
         void begin(){
@@ -60,48 +60,86 @@ class BotController{
             drive_motor.stop();
         };
 
-        void drive(){
-            const int spinner_full_change_time = 10; //seconds
-            const float spinner_rate_of_change = MotorController::INPUT_SPEED_TOP / (spinner_full_change_time * 1000); //units per millisecond
+        void fight(){
             led.on();
             int LX = ps2_controller.get_LX(), LY = ps2_controller.get_LY();
+            // bool up_pressed = ps2_controller.up_pressed();
+            // bool down_pressed = ps2_controller.down_pressed();
+            // bool left_pressed = ps2_controller.left_pressed();
+            // bool right_pressed = ps2_controller.right_pressed();
+            bool up_pressed = ps2_controller.up_state();
+            bool down_pressed = ps2_controller.down_state();
+            bool left_pressed = ps2_controller.left_state();
+            bool right_pressed = ps2_controller.right_state();
+            // if (up_pressed) {
+            //     _up_count++;
+            // }
+            // if (down_pressed) {
+            //     _down_count++;
+            // }
+            // if (left_pressed) {
+            //     _left_count++;
+            // }
+            // if (right_pressed) {
+            //     _right_count++;
+            // }
+            // Serial.printf("Left Count = %d\n", _left_count);
+            // Serial.printf("Up = %d\t Down = %d\t Left = %d\t Right = %d\n", _up_count, _down_count, _left_count, _right_count);
+            // Serial.printf("LX = %d\t LY = %d\t Circle = %d\n", LX, LY, circle_pressed);
             // Serial.printf("LX = %d\t LY = %d\n", LX, LY);
-            _forward = map(ps2_controller.get_LY(), 254, 0, MotorController::INPUT_SPEED_BOTTOM, MotorController::INPUT_SPEED_TOP);
-            _right = map(ps2_controller.get_LX(), 0, 254, -256, 256); //mapping from 254 instead of 255 as using 255 gives 127.5 as midpoint and resulting rounding error leads to small motor signal at rest.
-            // printf("Forward = %d\t Right = %d\n", _forward, _right);
+            drive_wheel(LY);
+            int time_since_last_steer = millis() - _time_of_last_steer;
+            if (time_since_last_steer >= 20) { //ms
+                steer(LX);
+                _time_of_last_steer = millis();
+            }
+        }
+
+        void drive_wheel(int LY){
+            _forward = map(LY, 254, 0, _drive_motor_input_speed_top, _drive_motor_input_speed_bottom);
             drive_motor.drive(_forward);
-            // if (abs(_right) > 10) {
-            //     Serial.println("Steering");
-                // Steer by changing spinner velocity.
-                // int millis_since_spinner_last_changed = millis() - _time_of_last_spinner_change;
-                // int change = millis_since_spinner_last_changed * spinner_rate_of_change;
-                // if (change > 0) {
-                //     if (_right < 0) {
-                //         change *= -1;
-                //     }
-                //     left_spinner.drive(left_spinner.get_speed() - change);
-                //     right_spinner.drive(right_spinner.get_speed() - change);
-                //     _time_of_last_spinner_change = millis();
-                //     }
-                // }
-            Serial.printf("LX = %d\n", ps2_controller.get_LX());
-            Serial.printf("Right = %d\n", _right);
-            if (_right > 100) {
-                Serial.println("Steering Right"); 
-                left_spinner.drive(left_spinner.get_speed() - 1);
-                right_spinner.drive(right_spinner.get_speed() - 1);
+        }
+
+        void steer(int LX){
+            int steering_sensitivity = 5;
+            _right = map(LX, 0, 254, steering_sensitivity, -steering_sensitivity);//_right_min, _right_max); //mapping from 254 instead of 255 as using 255 gives 127.5 as midpoint and resulting rounding error leads to small motor signal at rest.
+            // Serial.printf("LX = %d\n", LX);
+            // Serial.printf("Right = %d\n", _right);
+            if (abs(_right) <= 1) {
+                _right = 0;
             }
-            else if (_right < -100) {
-                Serial.println("Steering Left");
-                left_spinner.drive(left_spinner.get_speed() + 1);
-                right_spinner.drive(right_spinner.get_speed() + 1);
-            }
-            else {
-                Serial.println("Not Steering");
-                left_spinner.stop();
-                right_spinner.stop();
-            }
-            delay(100);
+
+            // Serial.printf("LX %d\tRight = %d\n", LX, _right);
+            right_spinner.drive(right_spinner.get_speed() + _right);
+            left_spinner.drive(left_spinner.get_speed() + _right);
+            // Serial.printf("right speed %d\t left speed %d\t", right_spinner.get_speed(), left_spinner.get_speed());
+
+            // float turn_per_ms = (float)_right * _turning_sensitivity;
+            // int current_spinner_speed = left_spinner.get_speed();
+            // int time_since_last_spinner_update = millis() - _time_of_last_spinner_update;
+            // int spinner_increase = turn_per_ms * time_since_last_spinner_update;
+            // int new_spinner_speed = current_spinner_speed + spinner_increase;
+            // Serial.printf("LX %d\tRight %d\t turning_sensitivity %f\t right min %d\t right max %d\t\n", LX, _right, _turning_sensitivity, _right_min, _right_max);
+            // Serial.printf("Time elapsed %d\t turn per ms %f\tspinner_incrase %d\tnew_spinner_speed %d\n", time_since_last_spinner_update, turn_per_ms, spinner_increase, new_spinner_speed);
+            // _time_of_last_spinner_update = millis();
+
+
+
+            // if (_right > 50) {
+            //     Serial.println("Steering Right"); 
+            //     left_spinner.drive(left_spinner.get_speed() - 1);
+            //     right_spinner.drive(right_spinner.get_speed() - 1);
+            // }
+            // else if (_right < -50) {
+            //     Serial.println("Steering Left");
+            //     left_spinner.drive(left_spinner.get_speed() + 1);
+            //     right_spinner.drive(right_spinner.get_speed() + 1);
+            // }
+            // else {
+            //     Serial.println("Not Steering");
+            //     left_spinner.stop();
+            //     right_spinner.stop();
+            // }
         }
 
     private:
@@ -119,7 +157,12 @@ class BotController{
         int _drive_motor_input_speed_top;
         int _drive_motor_input_speed_bottom;
         int _wheel_forward = 0;
-        int _time_of_last_spinner_change = 0; //ms
+        int _time_of_last_steer = 0;  //ms
+        // int _time_of_last_spinner_update = 0; //ms
+        // const float _turning_sensitivity = 0.01;
+        // const int _right_min = -100;
+        // const int _right_max = 100;
+        int _up_count = 0, _down_count = 0, _left_count = 0, _right_count = 0;
 };
 
 
