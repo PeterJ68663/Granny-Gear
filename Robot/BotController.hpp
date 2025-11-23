@@ -58,15 +58,15 @@ class BotController{
             left_spinner.stop();
             right_spinner.stop();
             drive_motor.stop();
+            left_spinner.disarm();
+            right_spinner.disarm();
         };
 
         void fight(){
             led.on();
             int LX = ps2_controller.get_LX(), LY = ps2_controller.get_LY();
-            // bool up_pressed = ps2_controller.up_pressed();
-            // bool down_pressed = ps2_controller.down_pressed();
-            // bool left_pressed = ps2_controller.left_pressed();
-            // bool right_pressed = ps2_controller.right_pressed();
+            int RX = ps2_controller.get_RX(), RY = ps2_controller.get_RY();
+            // Serial.printf("LX = %d\tLY = %d\tRX = %d\tRY = %d\n", LX, LY, RX, RY);
             bool up_pressed = ps2_controller.up_state();
             bool down_pressed = ps2_controller.down_state();
             bool left_pressed = ps2_controller.left_state();
@@ -83,30 +83,56 @@ class BotController{
             // if (right_pressed) {
             //     _right_count++;
             // }
-            // Serial.printf("Left Count = %d\n", _left_count);
             // Serial.printf("Up = %d\t Down = %d\t Left = %d\t Right = %d\n", _up_count, _down_count, _left_count, _right_count);
-            // Serial.printf("LX = %d\t LY = %d\t Circle = %d\n", LX, LY, circle_pressed);
             // Serial.printf("LX = %d\t LY = %d\n", LX, LY);
+            // return;
+
+            if (RY < 20) {
+                drive_motor.arm();
+                left_spinner.arm();
+                right_spinner.arm();
+            }
+
+            if (left_pressed) {
+                inverted = !inverted;
+            }
+
+            _jink(RX, RY);
+
             drive_wheel(LY);
             int time_since_last_steer = millis() - _time_of_last_steer;
             if (time_since_last_steer >= 20) { //ms
                 steer(LX);
                 _time_of_last_steer = millis();
             }
+            if (up_pressed) {
+                left_spinner.drive(300);
+                right_spinner.drive(-300);
+            }
+            if (down_pressed) {
+                left_spinner.drive(0);
+                right_spinner.drive(0);
+            }
         }
 
         void drive_wheel(int LY){
-            _forward = map(LY, 254, 0, _drive_motor_input_speed_top, _drive_motor_input_speed_bottom);
+            _forward = map(LY, 0, 254, _drive_motor_input_speed_top, _drive_motor_input_speed_bottom);
+            if (inverted) {
+                _forward = -_forward;
+            }
             drive_motor.drive(_forward);
         }
 
         void steer(int LX){
-            int steering_sensitivity = 5;
+            int steering_sensitivity = 6;
             _right = map(LX, 0, 254, steering_sensitivity, -steering_sensitivity);//_right_min, _right_max); //mapping from 254 instead of 255 as using 255 gives 127.5 as midpoint and resulting rounding error leads to small motor signal at rest.
             // Serial.printf("LX = %d\n", LX);
             // Serial.printf("Right = %d\n", _right);
             if (abs(_right) <= 1) {
                 _right = 0;
+            }
+            if (inverted) {
+                _right = -_right;
             }
 
             // Serial.printf("LX %d\tRight = %d\n", LX, _right);
@@ -158,11 +184,64 @@ class BotController{
         int _drive_motor_input_speed_bottom;
         int _wheel_forward = 0;
         int _time_of_last_steer = 0;  //ms
+        int _time_of_last_jink = 0;  //ms
         // int _time_of_last_spinner_update = 0; //ms
         // const float _turning_sensitivity = 0.01;
         // const int _right_min = -100;
         // const int _right_max = 100;
         int _up_count = 0, _down_count = 0, _left_count = 0, _right_count = 0;
+        bool inverted = false;
+
+        void _jink(int RX, int RY){
+            int jink_rate = 40;
+            int time_since_last_jink = millis() - _time_of_last_jink;
+            if (time_since_last_jink >= 100) { //ms
+                _time_of_last_jink = millis();
+                if (RX > 180 && RY < 60){
+                    // Serial.println("Top Right");
+                    right_spinner.drive(right_spinner.get_speed() - jink_rate);
+                }
+                else if (RX > 180 && RY > 180){
+                    // Serial.println("Bottom Right");
+                    right_spinner.drive(right_spinner.get_speed() + jink_rate);
+                }
+                else if (RX < 60 && RY < 60){
+                    // Serial.println("Top Left");
+                    left_spinner.drive(left_spinner.get_speed() - jink_rate);
+                }
+                else if (RX < 60 && RY > 180){
+                    // Serial.println("Bottom Left");
+                    left_spinner.drive(left_spinner.get_speed() + jink_rate);
+                }
+            }
+        }
+
+        void _back_emf_test(){
+            delay(5000);
+            left_spinner.drive(100);
+            right_spinner.drive(-100);
+            delay(5000);
+            left_spinner.drive(0);
+            right_spinner.drive(0);
+            delay(5000);
+            left_spinner.drive(200);
+            right_spinner.drive(-200);
+            delay(5000);
+            left_spinner.drive(0);
+            right_spinner.drive(0);
+            delay(5000);
+            left_spinner.drive(300);
+            right_spinner.drive(-300);
+            delay(5000);
+            left_spinner.drive(0);
+            right_spinner.drive(0);
+            delay(5000);
+            left_spinner.drive(400);
+            right_spinner.drive(-400);
+            delay(5000);
+            left_spinner.drive(0);
+            right_spinner.drive(0);
+        }
 };
 
 

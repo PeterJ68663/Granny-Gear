@@ -221,10 +221,10 @@ void loop() {
   message[0] = ((unsigned char*) &LX)[0];
   message[1] = ((unsigned char*) &LY)[0];
   message[2] = ((unsigned char*) &RX)[0];
-  message[3] = ((unsigned char*) &buttons_byte)[0];
-  
-  message[4] = ((unsigned char*) &spin1)[0];
-  message[5] = ((unsigned char*) &spin2)[0];
+  message[3] = ((unsigned char*) &RY)[0];
+  message[4] = ((unsigned char*) &buttons_byte)[0];
+  message[5] = ((unsigned char*) &buttons_byte)[0];
+  // The below aren't used in this 'bot.
   message[6] = ((unsigned char*) &spin3)[0];
   message[7] = ((unsigned char*) &spin4)[0];
 

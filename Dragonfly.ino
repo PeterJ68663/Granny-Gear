@@ -46,6 +46,8 @@ DataLoggerInterface data_logger{udp_interface};
 
 BotController bot_controller{led_controller, left_spinner_controller, right_spinner_controller, drive_motor_controller, ps2_controller, accel_gyro};
 
+int receives_since_last_miss = 0;
+
 
 void setup() {
   Serial.begin(115200);
@@ -62,17 +64,24 @@ void setup() {
 }
 
 void loop() {
-    ps2_controller.ReadController();
-    if (ps2_controller.ReceivingFromController()){
-      // Serial.println("Received signal, driving.");
+  ps2_controller.ReadController();
+  if (ps2_controller.ReceivingFromController()){
+    receives_since_last_miss += 1;
+    // Serial.println("Received signal, driving.");
+    if (receives_since_last_miss > 4) {
+      // Discard first few packets as often corrupted.
       bot_controller.fight();
     }
-    else{
-      // Serial.println("No signal, stopping.");
-      bot_controller.stop();
-    }
-    delay(10);
+  }
+  else{
+    Serial.println("No signal, stopping.");
+    receives_since_last_miss += 1;
+    bot_controller.stop();
+  }
+  delay(10);
 }
+
+
 
 
 

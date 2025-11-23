@@ -26,6 +26,10 @@ class MotorController {
             Serial.printf("Motor Controller Started at %d\n", millis());
         }
         void drive(int speed){
+            if (!_armed){
+                Serial.println("Not armed, not driving.");
+                return;
+            }
             _speed = constrain(speed, _input_min, _input_max);
             int servo_speed = map(speed, _input_min, _input_max, _servo_min, _servo_max);
             // Serial.printf("Drive called with %d;\tWriting %d to ESC on pin\t%d\n", speed, servo_speed, _esc_pin);
@@ -33,6 +37,7 @@ class MotorController {
         };
         void stop(){
             _pwm_writer.writeMicroseconds(_servo_mid);
+            _speed = 0;
         };
         int get_speed(){
             return _speed;
@@ -46,6 +51,14 @@ class MotorController {
             return _input_min;
         }
 
+        void arm(){
+            _armed = true;
+        }
+
+        void disarm(){
+            _armed = false;
+        }
+
 
     private:
         int _servo_min;
@@ -56,6 +69,7 @@ class MotorController {
         int _esc_pin;
         int _speed = 0;
         Servo _pwm_writer;
+        bool _armed = false;
 };
 
 #endif

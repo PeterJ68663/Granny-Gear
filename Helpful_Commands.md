@@ -10,4 +10,4 @@ arduinocli compile --fqbn
 ## Upload:
 arduinocli upload --fqbn --port 
 
-arduinocli upload --fqbn esp8266:esp8266:d1_mini --port COM3
+arduinocli upload --fqbn esp8266:esp8266:d1_mini --port COM4

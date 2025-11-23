@@ -124,6 +124,9 @@ class PS2_ControllerInterface{
             unsigned char get_RX(){
                 return _RX;
             }
+            unsigned char get_RY(){
+                return _RY;
+            }
             bool left_pressed(){
                 return _left_pressed;
             }
@@ -182,7 +185,13 @@ class PS2_ControllerInterface{
                     _LX = command[0];
                     _LY = command[1];
                     _RX = command[2];
-                    unsigned char buttons_byte = command[3];
+                    _RY = command[3];
+                    unsigned char buttons_byte = command[4];
+                    unsigned char duplicate_buttons_byte = command[5];
+                    if (buttons_byte != duplicate_buttons_byte){
+                        Serial.println("Buttons byte 'checksum' failed.");
+                        buttons_byte = 0;
+                    }
                     _buttons_from_byte(buttons_byte);
                     //  measured_rpm = 500 + command[4] + command[5] + command[6] + command[7];
                     _max_melty_throttle = 1500 + command[8];
@@ -211,6 +220,7 @@ class PS2_ControllerInterface{
             unsigned char _LX = 127;
             unsigned char _LY = 127;
             unsigned char _RX = 127;
+            unsigned char _RY = 127;
             bool _left_pressed = false;
             bool _right_pressed = false;
             bool _up_pressed = false;
