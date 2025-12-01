@@ -87,6 +87,9 @@ class BotController{
             // Serial.printf("LX = %d\t LY = %d\n", LX, LY);
             // return;
 
+            // accel_gyro.read_accelerometer();
+            accel_gyro.read_gyroscope();
+
             if (RY < 20) {
                 drive_motor.arm();
                 left_spinner.arm();
