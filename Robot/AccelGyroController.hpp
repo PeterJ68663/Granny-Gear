@@ -111,7 +111,7 @@ class AccelGyroController{
             int16_t gyroscope_y = Wire.read() << 8 | Wire.read(); // reading registers: 0x45 (GYRO_YOUT_H) and 0x46 (GYRO_YOUT_L)
             int16_t gyroscope_z = Wire.read() << 8 | Wire.read(); // reading registers: 0x47 (GYRO_ZOUT_H) and 0x48 (GYRO_ZOUT_L)
 
-            Serial.printf("%d\t%d\t%d\n", gyroscope_x, gyroscope_y, gyroscope_z);
+            // Serial.printf("%d\t%d\t%d\n", gyroscope_x, gyroscope_y, gyroscope_z);
 
             // gyroscope_x += 93, gyroscope_y -= 37, gyroscope_z -= 30;
             // gyroscope_x -= 65462, gyroscope_y -= 37, gyroscope_z -= 30;
@@ -121,7 +121,7 @@ class AccelGyroController{
             _gyro_y = gyroscope_y / GYRO_SCALING_FACTOR;
             _gyro_z = gyroscope_z / GYRO_SCALING_FACTOR;
 
-            Serial.printf("%d\t%d\t%d\n\n", _gyro_x, _gyro_y, _gyro_z);
+            // Serial.printf("%d\t%d\t%d\n\n", _gyro_x, _gyro_y, _gyro_z);
 
 
             // dividing by 65.5 because we configured the gyroscope range to +/- 500deg/s which has a sensitivity of 65.5 LSB/deg/s.

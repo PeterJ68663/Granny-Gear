@@ -87,9 +87,6 @@ class BotController{
             // Serial.printf("LX = %d\t LY = %d\n", LX, LY);
             // return;
 
-            // accel_gyro.read_accelerometer();
-            accel_gyro.read_gyroscope();
-
             if (RY < 20) {
                 drive_motor.arm();
                 left_spinner.arm();
@@ -100,14 +97,20 @@ class BotController{
                 inverted = !inverted;
             }
 
-            _jink(RX, RY);
+            // accel_gyro.read_accelerometer();
+            accel_gyro.read_gyroscope();
+            _current_angular_speed = accel_gyro.get_gyro_x();
+
+            // _jink(RX, RY);
 
             drive_wheel(LY);
             int time_since_last_steer = millis() - _time_of_last_steer;
-            if (time_since_last_steer >= 20) { //ms
+            if (time_since_last_steer >= 10) { //ms
                 steer(LX);
                 _time_of_last_steer = millis();
             }
+
+            // Handle direct commands for spinner speed:
             if (up_pressed) {
                 left_spinner.drive(300);
                 right_spinner.drive(-300);
@@ -127,39 +130,41 @@ class BotController{
         }
 
         void steer(int LX){
-            int steering_sensitivity = 6;
-            _right = map(LX, 0, 254, steering_sensitivity, -steering_sensitivity);//_right_min, _right_max); //mapping from 254 instead of 255 as using 255 gives 127.5 as midpoint and resulting rounding error leads to small motor signal at rest.
-            // Serial.printf("LX = %d\n", LX);
-            // Serial.printf("Right = %d\n", _right);
-            if (abs(_right) <= 1) {
-                _right = 0;
+            int _desired_angular_speed = map(LX, 0, 254, _fastest_angular_speed, -_fastest_angular_speed); // Degrees per second; Clockwise. //mapping from 254 instead of 255 as using 255 gives 127.5 as midpoint and resulting rounding error leads to small motor signal at rest.
+            if (abs(_desired_angular_speed) <= 1) {
+                _desired_angular_speed = 0;
             }
             if (inverted) {
-                _right = -_right;
+                _desired_angular_speed = -_desired_angular_speed;
             }
+            // Serial.printf("Current Angular Speed: %d\n", _current_angular_speed);
+            int P = _desired_angular_speed - _current_angular_speed;
+            float eps_p = 0.005;
 
-            // Serial.printf("LX %d\tRight = %d\n", LX, _right);
-            right_spinner.drive(right_spinner.get_speed() + _right);
-            left_spinner.drive(left_spinner.get_speed() + _right);
+            int _speed_change = eps_p * P;
+
+            // Serial.printf("LX %d\tSpeed change right = %d\n", LX, _speed_change);
+            right_spinner.drive(right_spinner.get_speed() + _speed_change);
+            left_spinner.drive(left_spinner.get_speed() + _speed_change);
             // Serial.printf("right speed %d\t left speed %d\t", right_spinner.get_speed(), left_spinner.get_speed());
 
-            // float turn_per_ms = (float)_right * _turning_sensitivity;
+            // float turn_per_ms = (float)_desired_angular_speed * _turning_sensitivity;
             // int current_spinner_speed = left_spinner.get_speed();
             // int time_since_last_spinner_update = millis() - _time_of_last_spinner_update;
             // int spinner_increase = turn_per_ms * time_since_last_spinner_update;
             // int new_spinner_speed = current_spinner_speed + spinner_increase;
-            // Serial.printf("LX %d\tRight %d\t turning_sensitivity %f\t right min %d\t right max %d\t\n", LX, _right, _turning_sensitivity, _right_min, _right_max);
+            // Serial.printf("LX %d\tRight %d\t turning_sensitivity %f\t right min %d\t right max %d\t\n", LX, _desired_angular_speed, _turning_sensitivity, _desired_angular_speed_min, _desired_angular_speed_max);
             // Serial.printf("Time elapsed %d\t turn per ms %f\tspinner_incrase %d\tnew_spinner_speed %d\n", time_since_last_spinner_update, turn_per_ms, spinner_increase, new_spinner_speed);
             // _time_of_last_spinner_update = millis();
 
 
 
-            // if (_right > 50) {
+            // if (_desired_angular_speed > 50) {
             //     Serial.println("Steering Right"); 
             //     left_spinner.drive(left_spinner.get_speed() - 1);
             //     right_spinner.drive(right_spinner.get_speed() - 1);
             // }
-            // else if (_right < -50) {
+            // else if (_desired_angular_speed < -50) {
             //     Serial.println("Steering Left");
             //     left_spinner.drive(left_spinner.get_speed() + 1);
             //     right_spinner.drive(right_spinner.get_speed() + 1);
@@ -180,13 +185,14 @@ class BotController{
         AccelGyroController &accel_gyro;
 
         int _forward = 0;
-        int _right = 0;
         int _spinner_input_speed_top;
         int _spinner_input_speed_bottom;
         int _drive_motor_input_speed_top;
         int _drive_motor_input_speed_bottom;
         int _wheel_forward = 0;
         int _time_of_last_steer = 0;  //ms
+        int _current_angular_speed = 0; // Degrees per second.
+        int _fastest_angular_speed = 1000; // Degrees per second.
         int _time_of_last_jink = 0;  //ms
         // int _time_of_last_spinner_update = 0; //ms
         // const float _turning_sensitivity = 0.01;
