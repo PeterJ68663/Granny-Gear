@@ -99,7 +99,10 @@ class BotController{
 
             // accel_gyro.read_accelerometer();
             accel_gyro.read_gyroscope();
-            _current_angular_speed = accel_gyro.get_gyro_x();
+            _current_angular_speed = accel_gyro.get_gyro_x() * -1;
+            if (inverted){
+                _current_angular_speed *= -1;
+            }
 
             // _jink(RX, RY);
 
@@ -134,14 +137,14 @@ class BotController{
             if (abs(_desired_angular_speed) <= 1) {
                 _desired_angular_speed = 0;
             }
-            if (inverted) {
-                _desired_angular_speed = -_desired_angular_speed;
-            }
             // Serial.printf("Current Angular Speed: %d\n", _current_angular_speed);
             int P = _desired_angular_speed - _current_angular_speed;
-            float eps_p = 0.005;
+            float eps_p = 0.05; // 0.05 for single spinner steering.
 
             int _speed_change = eps_p * P;
+            if (inverted){
+                _speed_change *= -1;  // Because the motors are upside down, the effect of the speed change is flipped.
+            }
 
             // Serial.printf("LX %d\tSpeed change right = %d\n", LX, _speed_change);
             right_spinner.drive(right_spinner.get_speed() + _speed_change);
