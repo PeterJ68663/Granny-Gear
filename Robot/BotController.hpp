@@ -97,11 +97,14 @@ class BotController{
                 inverted = !inverted;
             }
 
-            // accel_gyro.read_accelerometer();
+            accel_gyro.read_accelerometer();
+            _current_rightwards_acceleration = accel_gyro.get_accel_y() * -1;
             accel_gyro.read_gyroscope();
+            Serial.printf("Accel: %d\tGyro: %d\n", accel_gyro.get_accel_y(), accel_gyro.get_gyro_x());
             _current_angular_speed = accel_gyro.get_gyro_x() * -1;
             if (inverted){
                 _current_angular_speed *= -1;
+                _current_rightwards_acceleration *= -1;
             }
 
             // _jink(RX, RY);
@@ -115,8 +118,8 @@ class BotController{
 
             // Handle direct commands for spinner speed:
             if (up_pressed) {
-                left_spinner.drive(300);
-                right_spinner.drive(-300);
+                left_spinner.drive(200);
+                right_spinner.drive(-200);
             }
             if (down_pressed) {
                 left_spinner.drive(0);
@@ -139,9 +142,12 @@ class BotController{
             }
             // Serial.printf("Current Angular Speed: %d\n", _current_angular_speed);
             int P = _desired_angular_speed - _current_angular_speed;
-            float eps_p = 0.05; // 0.05 for single spinner steering.
+            int D = _current_rightwards_acceleration;
+            Serial.printf("D: %d\tP: %d\n", D, P);
+            float eps_p = 0.005; // 0.05 for single spinner steering.
+            float eps_d = 0;
 
-            int _speed_change = eps_p * P;
+            int _speed_change = (eps_p * P) + (eps_d * D);
             if (inverted){
                 _speed_change *= -1;  // Because the motors are upside down, the effect of the speed change is flipped.
             }
@@ -194,6 +200,7 @@ class BotController{
         int _drive_motor_input_speed_bottom;
         int _wheel_forward = 0;
         int _time_of_last_steer = 0;  //ms
+        int _current_rightwards_acceleration = 0;
         int _current_angular_speed = 0; // Degrees per second.
         int _fastest_angular_speed = 1000; // Degrees per second.
         int _time_of_last_jink = 0;  //ms
