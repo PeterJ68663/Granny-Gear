@@ -97,14 +97,11 @@ class BotController{
                 inverted = !inverted;
             }
 
-            accel_gyro.read_accelerometer();
-            _current_rightwards_acceleration = accel_gyro.get_accel_y() * -1;
             accel_gyro.read_gyroscope();
-            Serial.printf("Accel: %d\tGyro: %d\n", accel_gyro.get_accel_y(), accel_gyro.get_gyro_x());
+            // Serial.printf("Accel: %d\tGyro: %d\n", accel_gyro.get_accel_y(), accel_gyro.get_gyro_x());
             _current_angular_speed = accel_gyro.get_gyro_x() * -1;
             if (inverted){
                 _current_angular_speed *= -1;
-                _current_rightwards_acceleration *= -1;
             }
 
             // _jink(RX, RY);
@@ -112,7 +109,7 @@ class BotController{
             drive_wheel(LY);
             int time_since_last_steer = millis() - _time_of_last_steer;
             if (time_since_last_steer >= 10) { //ms
-                steer(LX);
+                steer(LX, time_since_last_steer);
                 _time_of_last_steer = millis();
             }
 
@@ -135,19 +132,20 @@ class BotController{
             drive_motor.drive(_forward);
         }
 
-        void steer(int LX){
+        void steer(int LX, int time_since_last_steer){
             int _desired_angular_speed = map(LX, 0, 254, _fastest_angular_speed, -_fastest_angular_speed); // Degrees per second; Clockwise. //mapping from 254 instead of 255 as using 255 gives 127.5 as midpoint and resulting rounding error leads to small motor signal at rest.
             if (abs(_desired_angular_speed) <= 1) {
                 _desired_angular_speed = 0;
             }
             // Serial.printf("Current Angular Speed: %d\n", _current_angular_speed);
-            int P = _desired_angular_speed - _current_angular_speed;
-            int D = _current_rightwards_acceleration;
-            Serial.printf("D: %d\tP: %d\n", D, P);
+            _P_error = _desired_angular_speed - _current_angular_speed;
+            _D_error = _P_error - _last_P_error / time_since_last_steer;
+            _last_P_error = _P_error;  // Set for next cycle.
+            // Serial.printf("P: %d\tD: %f\n", _P_error, _D_error);
             float eps_p = 0.005; // 0.05 for single spinner steering.
-            float eps_d = 0;
+            float eps_d = 0.005;
 
-            int _speed_change = (eps_p * P) + (eps_d * D);
+            int _speed_change = (eps_p * _P_error) + (eps_d * _D_error);
             if (inverted){
                 _speed_change *= -1;  // Because the motors are upside down, the effect of the speed change is flipped.
             }
@@ -200,8 +198,10 @@ class BotController{
         int _drive_motor_input_speed_bottom;
         int _wheel_forward = 0;
         int _time_of_last_steer = 0;  //ms
-        int _current_rightwards_acceleration = 0;
         int _current_angular_speed = 0; // Degrees per second.
+        int _P_error = 0;  // Difference between desired angular speed and true angular speed.
+        int _last_P_error = 0;  // Difference from previous cycle.
+        float _D_error = 0;  // Rate of change of difference.
         int _fastest_angular_speed = 1000; // Degrees per second.
         int _time_of_last_jink = 0;  //ms
         // int _time_of_last_spinner_update = 0; //ms
